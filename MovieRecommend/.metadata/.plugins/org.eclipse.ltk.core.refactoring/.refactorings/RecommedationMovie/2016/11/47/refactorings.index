@@ -1,0 +1,17 @@
+1479475729729	Rename package 'DataCrawl'
+1479475743630	Delete element
+1479475925836	Rename type 'DataCrawl'
+1479476181616	Encapsulate field 'movieCd'
+1479476185552	Encapsulate field 'movieNm'
+1479476191466	Encapsulate field 'movieNmEn'
+1479476194547	Encapsulate field 'prdtYear'
+1479476197612	Encapsulate field 'openDt'
+1479476200786	Encapsulate field 'typeNm'
+1479476203561	Encapsulate field 'prdtStatNm'
+1479476206990	Encapsulate field 'nationAlt'
+1479476210521	Encapsulate field 'genreAlt'
+1479476214790	Encapsulate field 'repNationNm'
+1479476222018	Encapsulate field 'repGenreNm'
+1479476395744	Delete element
+1479476453783	Encapsulate field 'genreList'
+1479477337956	Rename type 'MovieObj'

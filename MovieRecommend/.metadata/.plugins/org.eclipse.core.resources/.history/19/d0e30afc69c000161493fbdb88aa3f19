@@ -1,0 +1,440 @@
+package dbHandling;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.json.simple.*;
+
+import crawl.ImgParser;
+import crawl.Table;
+import javafx.util.Pair;
+import recommend.EvalInfo;
+import recommend.FriendRecommendInfo;
+import recommend.MovieInfo;
+import recommend.PersonInfo;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public class DBHandler {
+
+	private Connection conn = null;
+	private Statement stmt = null;
+	private ResultSet rs = null;
+	public DBHandler() {
+		// TODO Auto-generated method stub
+		try{
+			Class.forName("com.mysql.jdbc.Driver");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost", "root", "root");
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	public void addRecom(String id, String movieCd){
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+			
+			String query = "Insert into Movierecom values('"+id+"','"+movieCd+"') "
+			+ "On DUPLICATE KEY UPDATE Senderid = '"+ id + "', movieCd = '"+movieCd+"'";
+			stmt = conn.createStatement();
+			stmt.executeUpdate(query);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
+	public ArrayList<FriendRecommendInfo> getFriendRecommend(String id){
+		ArrayList<FriendRecommendInfo> list = new ArrayList<>();
+		rs = null;
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+
+			System.out.println(id);
+			String query = "select * from Movierecom where Senderid = '"+id+"'";
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(query);
+			while(rs.next()){
+				System.out.println("q");
+				list.add(new FriendRecommendInfo(id, rs.getString("movieCd")));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return list;
+	}
+	public void addEval(String id, String movieCd, String eval, String text){
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+			
+			String query = "Insert into Eval values('"+id+"', '"+movieCd+"','"+eval+"','"+text+"')"
+					+ "On DUPLICATE KEY UPDATE Userid = '"+ id + "'";
+			stmt = conn.createStatement();
+			stmt.executeUpdate(query);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public EvalInfo getEval(String id, String movieCd){
+		EvalInfo info = null;
+		rs = null;
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+			
+			String query = "Select * from Eval where Userid = '"+id+"' and movieCd = '"+movieCd+"'";
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(query);
+			while(rs.next()){
+				if(!rs.getString("Evalsc").equals(""))
+					info = new EvalInfo(id, rs.getString("movieCd"), Double.parseDouble(rs.getString("Evalsc")), rs.getString("Text"));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return info;
+	}
+	
+	public ArrayList<EvalInfo> getEvals(String id){
+		ArrayList<EvalInfo> list = new ArrayList<>();
+		rs = null;
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+			
+			String query = "Select * from Eval where Userid = '"+id+"'";
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(query);
+			while(rs.next()){
+				if(!rs.getString("Evalsc").equals(""))
+					list.add(new EvalInfo(id, rs.getString("movieCd"), Double.parseDouble(rs.getString("Evalsc")), rs.getString("Text")));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return list;
+	}
+	public void addUser(String id, String password, String name, String birth){
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+			
+			String query = "Insert into User values('"+id+"', '"+password+"','"+name+"','"+birth+"')"
+					+ "On DUPLICATE KEY UPDATE Userid = '"+ id + "'";
+			stmt = conn.createStatement();
+			stmt.executeUpdate(query);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void updateUser(String id, String password, String name, String birth){
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+			
+			String query = "Update User Set Password = '"+password+"', Name = '"+name+"', Birth = '"+birth+"' Where Userid = '"+id+"'";
+			stmt = conn.createStatement();
+			stmt.executeUpdate(query);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public ArrayList<PersonInfo> getUserList(){
+		ArrayList<PersonInfo> infos = new ArrayList<>();
+		rs = null;
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+			
+			String query = "select * from User";
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(query);
+			while(rs.next())
+				infos.add(new PersonInfo(rs.getString("Userid"),rs.getString("Password"),rs.getString("Name"),rs.getString("Birth"), 0));
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+		return infos;
+	}
+	public PersonInfo getUser(String id){
+		PersonInfo info;
+		rs = null;
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+			
+			String query = "select * from User where Userid = '"+id+"'";
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(query);
+			if(rs.next())
+				info = new PersonInfo(rs.getString("Userid"),rs.getString("Password"),rs.getString("Name"),rs.getString("Birth"), 0);
+			else
+				info = new PersonInfo();
+			return info;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	public boolean isUser(String id, String password){
+		rs = null;
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+			
+			String query = "select * from User where Userid = '"+id+"' and Password = '"+ password+"'";
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(query);
+			if(rs.next())//getString("Userid").equals(id))
+				return true;
+			else
+				return false;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+	}
+	public void setData(){
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Table table = new Table(conn, stmt, rs);
+		table.createtable();
+		crawlData();
+	}
+	private void crawlData(){
+		ImgParser imgParser = new ImgParser();
+		JSONObject object = null;
+		for(int i=0;i<100; i++){
+			try {
+				URL url = new URL("http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieList.json?key=e085252a202f9d6d1d8f773343c31677&curPage="+i);
+				InputStreamReader isr = new InputStreamReader(url.openConnection().getInputStream(), "UTF-8");
+				object = (JSONObject)JSONValue.parse(isr);
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+			JSONObject obj =(JSONObject) object.get("movieListResult");
+			JSONArray bodyArray = (JSONArray) obj.get("movieList");
+			for(int j = 0 ; j < bodyArray.size(); j++) 
+			{
+				JSONObject data = (JSONObject) bodyArray.get(j);
+				
+				String movieCd=data.get("movieCd").toString().replace("'", "бо");
+				String movieNm=data.get("movieNm").toString().replace("'", "бо");
+				String movieNmEn=data.get("movieNmEn").toString().replace("'", "бо");
+				String prdtYear=data.get("prdtYear").toString().replace("'", "бо");
+				String openDt=data.get("openDt").toString().replace("'", "бо"); 
+				String typeNm=data.get("typeNm").toString().replace("'", "бо");
+				String prdtStatNm=data.get("prdtStatNm").toString().replace("'", "бо");
+				String nationAlt=data.get("nationAlt").toString().replace("'", "бо");
+				String genreAlt=data.get("genreAlt").toString().replace("'", "бо");
+				String repNationNm=data.get("repNationNm").toString().replace("'", "бо");
+				String repGenreNm=data.get("repGenreNm").toString().replace("'", "бо");
+				String movieUrl=imgParser.crawling(movieNm);
+				System.out.println(movieCd+"\t"+movieNm+"\t"+movieNmEn+"\t"+prdtYear+"\t"+openDt+"\t"+typeNm+"\t"
+									+prdtStatNm+"\t"+nationAlt+"\t1"+genreAlt+"\t"+repNationNm+"\t2"+repGenreNm);
+
+				if(movieUrl==null||movieUrl.equals("http://img.cgv.co.kr/Movie/Thumbnail/Poster/000079/79180/79180_185.jpg")){
+					continue;
+				}
+				try{
+					if(!movieUrl.equals("NULL")){
+						String query = "insert into Movie values ('" + movieCd + "'," + "'" + movieNm + "','" + movieNmEn + "','"
+								+ prdtYear + "','" + openDt + "','" + typeNm + "','" + prdtStatNm + "','" + nationAlt + "','" 
+								+ genreAlt + "','" + repNationNm + "','" + repGenreNm + "'," + "0,0,0,'"+movieUrl+"')"
+								+ "On DUPLICATE KEY UPDATE movieCd = '"+ movieCd + "'";;
+						stmt = conn.createStatement();
+						stmt.executeUpdate(query);
+					}
+				}
+				catch (Exception e){
+				    //Handle errors for Class.forName
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public ArrayList<MovieInfo> getDataList(){
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		ArrayList<MovieInfo> tmp = new ArrayList<>();
+		try {
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery("SELECT * FROM MOVIE");
+			while(rs.next()){
+				MovieInfo info = new MovieInfo(rs.getString("movieCd"), rs.getString("movieNm"), rs.getString("movieNmEn"), 
+						rs.getString("prdtYear"), rs.getString("openDt"), rs.getString("typeNm"), rs.getString("prdtStatNm"), 
+						rs.getString("nationAlt"), rs.getString("genreAlt"), rs.getString("repNationNm"), rs.getString("repGenreNm"), rs.getString("URL"));
+				tmp.add(info);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return tmp;
+	}
+	public MovieInfo getData(String movieCd){
+		MovieInfo info = null;
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		try {
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery("SELECT * FROM MOVIE WHERE movieCd = '"+movieCd+"'");
+			if(rs.next()){
+				info = new MovieInfo(rs.getString("movieCd"), rs.getString("movieNm"), rs.getString("movieNmEn"), 
+						rs.getString("prdtYear"), rs.getString("openDt"), rs.getString("typeNm"), rs.getString("prdtStatNm"), 
+						rs.getString("nationAlt"), rs.getString("genreAlt"), rs.getString("repNationNm"), rs.getString("repGenreNm"), rs.getString("URL"));
+				
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return info;
+		}
+		return info;
+	}
+
+	public boolean checkLogin(String id, String pw){
+		try {
+			stmt= conn.createStatement();
+			System.out.println("Checking LOGIN");
+			System.out.println(id +", " +pw);
+			rs=stmt.executeQuery("select * from User where Userid='"+id+"' and Password='"+pw+"'");
+			if(rs.next()){
+				return true;
+			}
+			else 
+				return false;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	public boolean checkID(String id){
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+
+			stmt= conn.createStatement();
+			System.out.println("Checking ID");
+			rs=stmt.executeQuery("select * from User where Userid='"+id+"'");
+			if(rs.next()){
+				return true;
+			}
+			else 
+				return false;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	public ArrayList<String> getFriends(String id){
+		ArrayList<String> list = new ArrayList<>();
+		rs = null;
+			try {
+				stmt = conn.createStatement();
+				System.out.println("Connectig....");
+				stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+				stmt.executeUpdate("USE MovieSystem");
+				
+				String query = "Select * from Friends where F1 = '"+id+"'";
+				stmt = conn.createStatement();
+				rs=stmt.executeQuery(query);
+				while(rs.next())
+					list.add(rs.getString("F2"));
+			} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return list;
+	}
+	public void addFriend(String id,String friendID){
+		try {
+			stmt = conn.createStatement();
+			System.out.println("Connectig....");
+			stmt.executeUpdate("CREATE database IF NOT EXISTS MovieSystem");
+			stmt.executeUpdate("USE MovieSystem");
+			
+			String query = "Insert into Friends values('"+id+"', '"+friendID+"')";
+			stmt = conn.createStatement();
+			stmt.executeUpdate(query);
+			} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+}

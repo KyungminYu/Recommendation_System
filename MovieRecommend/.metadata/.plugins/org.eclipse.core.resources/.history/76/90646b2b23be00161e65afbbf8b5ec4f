@@ -1,0 +1,70 @@
+package crawl;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+
+public class ImgParser {//<img src="https://tv.pstatic.net
+	public String crawling(String MovieName){
+    
+		try{
+			String title=MovieName;
+			String result ="";
+			for(int i=0;i<title.length();i++){
+				result = result +unicodeEscaped(title.charAt(i));
+			}
+			//example.com은 연습으로 사용하기 위한 페이지이다. 간단한 페이지로 소스코드의 양도 적다.
+			String urlstr = "http://www.cgv.co.kr/search/default.aspx?query="+result;
+			//URL 문자열을 처리하기 위해 URL클래스를 이용한다.
+			URL url = new URL(urlstr);
+  
+			//소스코드를 가져오기 위한 스트림을 선언한다.
+			BufferedReader bf;
+			String line = new String();
+       
+			//URL클래스의 openStream()함수로 지정한 웹주소의 소스코드를 받아올 수 있다.
+			bf = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
+			   
+			
+			while((line=bf.readLine())!=null){
+				if((line.contains("http://img.cgv.co.kr/Movie/Thumbnail/Poster/")&&(line.contains("alt")))
+						||((line.contains("http://contents.cgv.co.kr/Upload")&&line.contains("alt")))){
+
+					String name = line.substring(line.indexOf("alt=&quot;"),line.indexOf("onerror")-2);
+					System.out.println(name);
+					String imgUrl = line.substring(line.indexOf("http://"),line.indexOf("alt")-2);
+					if(name.equals(result))
+						return imgUrl;
+				}
+			}                            
+			bf.close();
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+			return "NULL";
+		}
+		return "NULL";
+	}
+	public static String unicodeEscaped(Character ch) {
+		if (ch == null) 
+			return null;
+		
+		return unicodeEscaped(ch.charValue());
+	}
+	private static String unicodeEscaped(char ch) {
+		if (ch < 0x10) {
+			return "%u000" + Integer.toHexString(ch);
+		}
+		else if (ch < 0x100) {
+			return "%u00" + Integer.toHexString(ch);
+		}
+		else if (ch < 0x1000) {
+			return "%u0" + Integer.toHexString(ch);
+		}
+		return "%u" + Integer.toHexString(ch);
+	}
+}
+   
+   
+   
+   
+   

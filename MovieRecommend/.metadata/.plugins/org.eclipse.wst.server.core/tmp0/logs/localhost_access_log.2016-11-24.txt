@@ -1,0 +1,4 @@
+127.0.0.1 - - [24/Nov/2016:00:42:17 +0900] "GET / HTTP/1.1" 404 1000
+0:0:0:0:0:0:0:1 - - [24/Nov/2016:00:45:49 +0900] "GET /RecommedationMovie/RecommendMain.jsp HTTP/1.1" 200 507
+127.0.0.1 - - [24/Nov/2016:00:49:17 +0900] "GET / HTTP/1.1" 404 1000
+0:0:0:0:0:0:0:1 - - [24/Nov/2016:00:52:47 +0900] "GET /RecommedationMovie/RecommendMain.jsp HTTP/1.1" 500 4
